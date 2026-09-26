@@ -18,26 +18,34 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Force python3 to be Python 3.10
+      - name: Force python3 ke 3.10 (aggressive)
         run: |
-          echo "=== BEFORE ==="
-          which python; python --version
-          which python3; python3 --version
-          which pip; pip --version
-          which pip3; pip3 --version
-
           PYTHON_BIN=$(which python)
-          PIP_BIN=$(which pip)
+          echo "Python 3.10 location: $PYTHON_BIN"
+          $PYTHON_BIN --version
+
+          echo "=== SEBELUM ==="
+          ls -la /usr/bin/python3* || true
+          ls -la /usr/local/bin/python3* || true
+          which python3
+          python3 --version || true
 
           sudo ln -sf "$PYTHON_BIN" /usr/local/bin/python3
-          sudo ln -sf "$PIP_BIN" /usr/local/bin/pip3
+          sudo ln -sf "$PYTHON_BIN" /usr/bin/python3
+
+          sudo rm -f /usr/bin/python3.14 2>/dev/null || true
+          sudo rm -f /usr/local/bin/python3.14 2>/dev/null || true
+          sudo rm -f /usr/bin/python3.13 2>/dev/null || true
 
           hash -r
-          echo "=== AFTER ==="
-          which python3; python3 --version
-          which pip3; pip3 --version
+
+          echo "=== SESUDAH ==="
+          which python3
+          python3 --version
           python3 -c "import cgi; print('python3 cgi OK')"
           python -c "import cgi; print('python cgi OK')"
+
+          rm -rf ~/.buildozer/android/platform/build-* || true
 
       - name: Install system dependencies
         run: |
@@ -59,7 +67,7 @@ jobs:
           path: |
             ~/.buildozer
             .buildozer
-          key: buildozer-v3-${{ hashFiles('buildozer.spec') }}
+          key: buildozer-v4-${{ hashFiles('buildozer.spec') }}
 
       - name: Build APK
         run: |
