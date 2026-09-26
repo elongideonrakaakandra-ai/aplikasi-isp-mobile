@@ -18,10 +18,26 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Verify Python version
+      - name: Force python3 to be Python 3.10
         run: |
-          python --version
-          python -c "import cgi; print('cgi OK')"
+          echo "=== BEFORE ==="
+          which python; python --version
+          which python3; python3 --version
+          which pip; pip --version
+          which pip3; pip3 --version
+
+          PYTHON_BIN=$(which python)
+          PIP_BIN=$(which pip)
+
+          sudo ln -sf "$PYTHON_BIN" /usr/local/bin/python3
+          sudo ln -sf "$PIP_BIN" /usr/local/bin/pip3
+
+          hash -r
+          echo "=== AFTER ==="
+          which python3; python3 --version
+          which pip3; pip3 --version
+          python3 -c "import cgi; print('python3 cgi OK')"
+          python -c "import cgi; print('python cgi OK')"
 
       - name: Install system dependencies
         run: |
@@ -43,7 +59,7 @@ jobs:
           path: |
             ~/.buildozer
             .buildozer
-          key: buildozer-${{ hashFiles('buildozer.spec') }}
+          key: buildozer-v3-${{ hashFiles('buildozer.spec') }}
 
       - name: Build APK
         run: |
